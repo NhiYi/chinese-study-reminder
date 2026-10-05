@@ -1,0 +1,520 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "8020f2c1-a195-4385-9d99-160789b02814",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        -240,
+        0
+      ],
+      "webhookId": "d1de0436-8c5e-47aa-b334-aa425d24ee5c",
+      "credentials": {
+        "telegramApi": {
+          "id": "oIMEl2dukV1YGekr",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "9b81b7e2-82de-48a8-b301-9bfdefc2ce69",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        96,
+        192
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "zX4dOlHQZWZBdv1d",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.message?.chat?.id || 'daily_chinese_study' }}",
+        "contextWindowLength": 2
+      },
+      "id": "c1cdc512-bd1d-4a80-af0a-580b15d042f1",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        240,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Lời nhắc từ Agent 1:\n{{ $('Chinese Study Reminder').item.json.output }}\n\nTừ vựng hôm nay:\n{{ $json['TỪ VỰNG'] }} - {{ $json.PINYIN }} - {{ $json['NGHĨA'] }}",
+        "options": {
+          "systemMessage": "Bạn là AI Agent 2 - Study Manager.\nBạn nhận lời nhắc của Agent 1 và một từ vựng hôm nay.\nGiữ giọng cute, ngắn gọn của lời nhắc, rồi thêm cuối tin mục \"Từ hôm nay\" gồm chữ Hán, pinyin và nghĩa, kèm một câu ví dụ ngắn.\nChỉ trả về văn bản thuần, không Markdown table, không ký tự |, không tiêu đề, không giải thích, không dấu ngoặc kép bao quanh.",
+          "maxIterations": 5
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        560,
+        0
+      ],
+      "id": "00837754-593a-459d-9a10-f5076e981cc9",
+      "name": "Reminder Manager"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        496,
+        160
+      ],
+      "id": "40bc5dc8-9cc8-4599-ba59-685e1688f2c8",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "zX4dOlHQZWZBdv1d",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message?.text || 'Đã đến giờ học tiếng Trung hôm nay. Hãy tạo một lời nhắc học tiếng Trung ngắn gọn, dễ thương và động viên người dùng.' }}",
+        "options": {
+          "systemMessage": "Bạn là một trợ lý AI nhắc nhở học tiếng Trung mỗi ngày.\n\nNhiệm vụ của bạn là gửi lời nhắc học tiếng Trung ngắn gọn, dễ thương, gần gũi và mộc mạc. Hãy tạo cảm giác như một người bạn thân đang nhẹ nhàng nhắc nhau học bài, không quá nghiêm túc và không tạo áp lực.\n\nPhong cách:\n- Cute, thân thiện, tự nhiên.\n- Mộc mạc, gần gũi, giống cách nói chuyện hằng ngày.\n- Ngắn gọn, dễ đọc.\n- Có thể dùng emoji vừa phải như 🌱🐣📚💗✨.\n- Không nói quá trang trọng hoặc máy móc.\n- Không trách móc khi người dùng chưa học.\n- Luôn tạo cảm giác động viên và tích cực.\n\nMỗi lời nhắc nên:\n1. Nhắc người dùng hôm nay đến giờ học tiếng Trung.\n2. Khuyến khích học một chút, không cần quá nhiều.\n3. Có thể thêm một câu tiếng Trung đơn giản để tạo hứng thú.\n4. Kết thúc bằng một câu động viên dễ thương.\n\nVí dụ:\n\n\"🌱 Đến giờ học tiếng Trung rồi nè~\nHôm nay mình học một chút thôi cũng được, mỗi ngày tiến bộ một xíu là giỏi rồi 📚✨\n加油！你可以的！💗\"\n\nHoặc:\n\n\"🐣 Alooo, tới giờ học tiếng Trung rồi đó nha!\nMở sách ra học vài từ thôi cũng được, đừng để tiếng Trung nhớ mình mà mình quên tiếng Trung nha 😆\n加油呀！🌷\"\n\nHoặc:\n\n\"📚 Hôm nay mình học tiếng Trung chưa ta?\nChỉ cần 15 phút thôi cũng được nè 🌱\n一点一点地学习，你会越来越厉害！✨\nCố lên nhé! 💗\"\n\nKhông cần giải thích dài dòng. Chỉ tạo lời nhắc ngắn gọn, tự nhiên và phù hợp với việc học tiếng Trung mỗi ngày."
+        }
+      },
+      "id": "0afcdece-1290-46c9-939e-de112ce6fc12",
+      "name": "Chinese Study Reminder",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Get Chat ID').item.json['Chat ID'] }}",
+        "text": "={{ $('Reminder Manager').item.json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        928,
+        0
+      ],
+      "id": "883fa881-8d96-447c-a4c4-1b0bd000ad94",
+      "name": "Send a text message",
+      "webhookId": "e8ecbc66-d65a-4aed-a00a-673715642c6e",
+      "credentials": {
+        "telegramApi": {
+          "id": "oIMEl2dukV1YGekr",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 22
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        16,
+        -208
+      ],
+      "id": "249fb5ee-b15b-4331-af57-e076b3869819",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2abf438b-d7d9-48f2-b46f-55fc3279914b",
+              "name": "chatId",
+              "value": "={{ $json.message.chat.id }}",
+              "type": "string"
+            },
+            {
+              "id": "246e3b62-1149-4b2e-985f-1704cc5ea4ae",
+              "name": "",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -16,
+        0
+      ],
+      "id": "fe6fe4fa-3ad7-42b7-a903-8d57aceee4dc",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1xjAGjIg2w7zvlK1vk4SMujtcmCnDqkLLG2BLgNumjco",
+          "mode": "list",
+          "cachedResultName": "Chinese Reminder",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1xjAGjIg2w7zvlK1vk4SMujtcmCnDqkLLG2BLgNumjco/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1xjAGjIg2w7zvlK1vk4SMujtcmCnDqkLLG2BLgNumjco/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        800,
+        -176
+      ],
+      "id": "531dfd52-70b2-4f44-b647-2d25ccbcd6b2",
+      "name": "Get Chat ID",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ticr06BfZ5Vgj9Sg",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1xjAGjIg2w7zvlK1vk4SMujtcmCnDqkLLG2BLgNumjco",
+          "mode": "list",
+          "cachedResultName": "Chinese Reminder",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1xjAGjIg2w7zvlK1vk4SMujtcmCnDqkLLG2BLgNumjco/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 463797078,
+          "mode": "list",
+          "cachedResultName": "Vocab",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1xjAGjIg2w7zvlK1vk4SMujtcmCnDqkLLG2BLgNumjco/edit#gid=463797078"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Status",
+              "lookupValue": "New"
+            }
+          ]
+        },
+        "options": {
+          "returnFirstMatch": true
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        448,
+        -176
+      ],
+      "id": "39be81d0-2638-4152-a968-6af166861b63",
+      "name": "Get Vocab",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ticr06BfZ5Vgj9Sg",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1xjAGjIg2w7zvlK1vk4SMujtcmCnDqkLLG2BLgNumjco",
+          "mode": "list",
+          "cachedResultName": "Chinese Reminder",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1xjAGjIg2w7zvlK1vk4SMujtcmCnDqkLLG2BLgNumjco/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 463797078,
+          "mode": "list",
+          "cachedResultName": "Vocab",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1xjAGjIg2w7zvlK1vk4SMujtcmCnDqkLLG2BLgNumjco/edit#gid=463797078"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "STT": "={{ $('Get Vocab').first().json.STT }}",
+            "Status": "Sent",
+            "LastSent": "={{ $now.format('yyyy-MM-dd') }}"
+          },
+          "matchingColumns": [
+            "STT"
+          ],
+          "schema": [
+            {
+              "id": "STT",
+              "displayName": "STT",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "TỪ VỰNG",
+              "displayName": "TỪ VỰNG",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "PINYIN",
+              "displayName": "PINYIN",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "NGHĨA",
+              "displayName": "NGHĨA",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "LastSent",
+              "displayName": "LastSent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1120,
+        0
+      ],
+      "id": "e111975d-27aa-4488-8d21-4cb5a2dbe50a",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ticr06BfZ5Vgj9Sg",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Chinese Study Reminder",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Chinese Study Reminder",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Reminder Manager",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chinese Study Reminder": {
+      "main": [
+        [
+          {
+            "node": "Get Vocab",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reminder Manager": {
+      "main": [
+        [
+          {
+            "node": "Get Chat ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Chinese Study Reminder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Chinese Study Reminder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Chat ID": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Vocab": {
+      "main": [
+        [
+          {
+            "node": "Reminder Manager",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": -1,
+    "availableInMCP": false
+  },
+  "versionId": "42aaecb0-45f2-4b0b-b375-19ee4b595dc1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9e9628073a622080770e288e7b89a378c8cb46c1359319c22fa544c05c463ada"
+  },
+  "nodeGroups": [],
+  "id": "0KVTMUhCnU2PTB3p",
+  "tags": []
+}
